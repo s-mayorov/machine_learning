@@ -2,6 +2,7 @@ import re
 from pandas.api.types import is_string_dtype, is_numeric_dtype, is_categorical_dtype
 import numpy as np
 import pandas as pd
+from sklearn.ensemble import forest
 
 def add_datepart(df, fldnames, drop=True, time=False, errors="raise"):	
     """add_datepart converts a column of df from a datetime64 to many columns containing
@@ -306,3 +307,17 @@ def proc_df(df, y_fld=None, skip_flds=None, ignore_flds=None, do_scale=False, na
     res = [df, y, na_dict]
     if do_scale: res = res + [mapper]
     return res
+
+
+def set_rf_samples(n):
+    """ Changes Scikit learn's random forests to give each tree a random sample of
+    n random rows.
+    """
+    forest._generate_sample_indices = (lambda rs, n_samples:
+        forest.check_random_state(rs).randint(0, n_samples, n))
+
+def reset_rf_samples():
+    """ Undoes the changes produced by set_rf_samples.
+    """
+    forest._generate_sample_indices = (lambda rs, n_samples:
+        forest.check_random_state(rs).randint(0, n_samples, n_samples))
